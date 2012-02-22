@@ -1,6 +1,6 @@
 package NoCat;
 
-use constant VERSION	=> "0.81.20020808.20040523";
+use constant VERSION	=> "0.90";
 use constant PERMIT	=> "Permit";
 use constant DENY	=> "Deny";
 use constant PUBLIC	=> "Public";
@@ -88,7 +88,7 @@ sub new {
     # (i.e. the NOCAT environment variable was never set.)
     #
     if ( exists $self->{ConfigFile} ) {
-	$self->{ConfigFile} ||= "$FindBin::Bin/../nocat.conf";
+	$self->{ConfigFile} ||= "/etc/nocat-ptp.conf";
 	$self->read_config( delete $self->{ConfigFile} );
     }
 

@@ -2,9 +2,7 @@
 
 use POSIX qw(setsid);
 use Getopt::Std;
-use FindBin;
 
-use lib "$FindBin::Bin/../lib";
 use NoCat;
 use strict;
 
@@ -16,15 +14,12 @@ $SIG{INT} = sub { exit };
 # Set some default path values.
 $ENV{PATH} = "$ENV{PATH}:/sbin:/usr/sbin:/usr/local/sbin";
 
-# Chdir home.
-chdir( "$FindBin::Bin/.." );
-
 # Get the command-line arguments:
 my %opt; getopts( "?RDFf:" => \%opt );
 
 if ( $opt{"?"} ) {
     die <<End;
-NoCat gateway command-line arguments:
+NoCatAuth gateway command-line arguments:
     -D		Debug mode. Gateway forks a child that actually
 		performs the gateway functions.
     -F		Foreground mode. Don't fork into the background.
