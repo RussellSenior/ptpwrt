@@ -1,6 +1,0 @@
-# add to feeds.conf:
-# src-git personaltelco http://iris.personaltelco.net/~keegan/packages.git
-
-scripts/feeds update personaltelco
-scripts/feeds install -a -p personaltelco
-
