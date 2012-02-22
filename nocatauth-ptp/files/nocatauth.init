@@ -1,0 +1,15 @@
+#!/bin/sh /etc/rc.common
+# nocatauth: init script for the PTP version of NoCatAuth on OpenWrt
+# Copyright 2012 Personal Telco Project
+
+START=99
+GATEWAY=/usr/bin/nocatauth
+
+start() {
+    $GATEWAY
+}
+
+stop() {
+    killall gateway
+}
+
