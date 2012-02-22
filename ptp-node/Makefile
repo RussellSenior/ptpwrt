@@ -12,13 +12,19 @@ include $(INCLUDE_DIR)/package.mk
 define Package/ptp-node
   TITLE:=Personal Telco Project node metapackage
   URL:=https://personaltelco.net/wiki/OpenWrt
-  DEPENDS:=+ptp-utils \
-  	+dnsmasq \
+  DEPENDS:=+dnsmasq \
   	+dropbear \
 	+batman-adv \
 	+curl \
 	+iftop \
-	+net-snmp
+	+net-snmp \
+	+nocatauth \
+	+olsrd \
+	+openvpn \
+	+radvd \
+	+rsync \
+	+tcpdump-mini \
+	+wget
 endef
 
 define Package/ptp-node/description
@@ -26,13 +32,20 @@ define Package/ptp-node/description
  used in common Personal Telco Project node installations.
 
  Depends on:
- - ptp-utils
+ - ptp-utils (TODO!)
  - dnsmasq
  - dropbear
  - batman-adv
  - curl
  - iftop
  - net-snmp
+ - nocatauth
+ - olsrd
+ - openvpn
+ - radvd
+ - rsync
+ - tcpdump-mini
+ - wget
 endef
 
 $(eval $(call Package,ptp-node))
