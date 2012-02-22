@@ -1,9 +1,9 @@
-PTP packages for OpenWrt
-========================
+Personal Telco Project packages for OpenWrt
+===========================================
 
 For more information about OpenWrt, visit https://openwrt.org/
 
-For more information about Personal Telco, visit https://personaltelco.net/wiki/
+For more information about the Personal Telco Project, visit https://personaltelco.net/wiki/
 
 Usage
 -----
