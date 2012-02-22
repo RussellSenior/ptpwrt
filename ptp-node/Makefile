@@ -17,7 +17,7 @@ define Package/ptp-node
   MAINTAINER:=Keegan Quinn <keegan@personaltelco.net>
   DEPENDS:=+dnsmasq \
 	+dropbear \
-	+batman-adv \
+	+kmod-batman-adv \
 	+curl \
 	+iftop \
 	+net-snmp \
@@ -38,7 +38,7 @@ define Package/ptp-node/description
  - ptp-utils (TODO!)
  - dnsmasq
  - dropbear
- - batman-adv
+ - kmod-batman-adv
  - curl
  - iftop
  - net-snmp
