@@ -19,10 +19,10 @@ define Package/ptp-utils
 endef
 
 define Package/ptp-utils/description
- Assorted utility scripts which are frequently used in common
- Personal Telco Project node installations.
+Assorted utility scripts which are frequently used in common
+Personal Telco Project node installations.
 
- Includes the following scripts:
+Includes the following scripts:
  - assoc-count
  - client-status
  - watch-traffic
@@ -30,6 +30,12 @@ define Package/ptp-utils/description
  - wimax-sig
  - wimax-up
  - wimax-down
+endef
+
+define Build/Compile
+endef
+
+define Build/Configure
 endef
 
 define Package/ptp-utils/install

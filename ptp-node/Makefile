@@ -30,10 +30,10 @@ define Package/ptp-node
 endef
 
 define Package/ptp-node/description
- Meta-configuration option which depends on all software which is
- used in common Personal Telco Project node installations.
+Meta-configuration option which depends on all software which is
+used in common Personal Telco Project node installations.
 
- Depends on:
+Depends on:
  - ptp-utils (TODO!)
  - dnsmasq
  - dropbear
@@ -50,8 +50,13 @@ define Package/ptp-node/description
  - wget
 endef
 
+define Build/Compile
+endef
+
+define Build/Configure
+endef
+
 define Package/ptp-node/install
-	true
 endef
 
 $(eval $(call BuildPackage,ptp-node))

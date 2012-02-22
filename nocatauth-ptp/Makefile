@@ -40,12 +40,18 @@ define Package/nocatauth-ptp
 endef
 
 define Package/nocatauth-ptp/description
- NoCatAuth is the original "catch and release" captive portal
- implementation. It provides a simple splash screen web page for
- clients on your network. It is written in Perl.
+NoCatAuth is the original "catch and release" captive portal
+implementation. It provides a simple splash screen web page for
+clients on your network. It is written in Perl.
 
- This is the Personal Telco version of NoCatAuth, with several
- patches and customizations. It may not be suitable for general use.
+This is the Personal Telco version of NoCatAuth, with several
+patches and customizations. It may not be suitable for general use.
+endef
+
+define Build/Compile
+endef
+
+define Build/Configure
 endef
 
 define Package/nocatauth-ptp/install
