@@ -61,11 +61,11 @@ define Package/nocatauth-ptp/install
 	$(INSTALL_DIR) $(1)/etc/init.d
 	$(INSTALL_BIN) ./files/nocatauth.init $(1)/etc/init.d/nocatauth
 
-	$(INSTALL_DIR) $(1)/usr/bin
-	$(INSTALL_BIN) ./files/bin/gateway $(1)/usr/bin/nocatauth
+	$(INSTALL_DIR) $(1)/usr/sbin
+	$(INSTALL_BIN) ./files/bin/gateway $(1)/usr/sbin/nocatauth
 
-	$(INSTALL_DIR) $(1)/usr/lib/perl5
-	$(CP) -r ./files/lib/* $(1)/usr/lib/perl5/
+	$(INSTALL_DIR) $(1)/usr/lib/perl5/5.10
+	$(CP) -r ./files/lib/* $(1)/usr/lib/perl5/5.10/
 
 	$(INSTALL_DIR) $(1)/usr/lib/nocatauth
 	$(CP) -r ./files/libexec/* $(1)/usr/lib/nocatauth/
