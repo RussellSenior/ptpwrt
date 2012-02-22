@@ -5,6 +5,9 @@ For more information about OpenWrt, visit https://openwrt.org/
 
 For more information about Personal Telco, visit https://personaltelco.net/wiki/
 
+Usage
+-----
+
 Add to your feeds.conf:
 
     src-git ptpwrt git://github.com/keeganquinn/ptpwrt.git
