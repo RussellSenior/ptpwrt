@@ -1,0 +1,166 @@
+###
+## Running Your Own Auth Service.
+##
+## --Rob, 12/30/01
+##
+
+So, you want to run an Auth service.  Do you really need to?
+
+If you want to be a part of one of the many local community wireless groups
+(PersonalTelco lists more than 30 as of this writing; see
+http://personaltelco.net/index.cgi/WirelessCommunities), you probably don't
+need to run your own Auth service.  Chances are, someone in your area is
+already running one, and they'd be happy to help you get your wireless node
+online as an affiliate.  Even if there isn't anyone local, you are welcome
+to use NoCat's public auth service, at auth.nocat.net.
+
+But if you want to run a private wireless network, or are starting a public
+group of your own, or are just a control freak who likes to delve deep into
+the psychotic late-night ramblings of other people's code, you'll likely
+want to administer your very own auth system.  This document should help.
+
+We'll assume that you have experience setting up a NoCat gateway, and are
+comfortable with installing system software.  The auth system has only been
+tested on Linux, but it should theoretically work on any platform that
+supports all of the prerequisites.
+
+###
+## Required Software
+##
+
+* An SSL enabled webserver, preferably with a registered SSL cert.  (We run
+  Apache + mod_ssl on our site.)
+
+* Perl 5 (5.6 or better recommended)
+
+* Digest::MD5, DBI, and DBD::MySQL perl modules (get them from CPAN)
+
+* Gnu Privacy Guard (gnupg 1.0.6 or better), available at
+  http://www.gnupg.org/download.html
+
+RECOMMENDED:
+
+* MySQL (3.23.4x or better).  Definitely necessary if you want to
+  participate in roaming agreements with other wireless groups.  Otherwise,
+  you can use a local password file as an authentication source.  Other
+  authentication sources are planned, but are currently non-operational.
+
+
+Get all of the above installed and running first.  A registered SSL cert is
+REQUIRED in production, as the whole security of the system is hinging on
+it.  A non-registered cert could allow someone to spoof the auth service,
+causing all sorts of nastiness.  (Alternatively, you could give all of your
+clients a copy of your Certificate Authority ahead of time, but we'll save
+that for another discussion.)
+
+
+###
+## Installation
+## 
+
+
+1. Unpack the NoCatAuth tarball. You probably already did this if you're
+reading this file.
+
+    $ tar zvxf NoCatAuth-x.xx.tar.gz
+
+
+2. Edit the Makefile, if necessary. The only real option at present is
+INST_PATH, which determines where NoCatAuth gets installed to.  The default
+is '/usr/local/nocat', so if that's okay with you, you can skip this step.
+
+
+3. From the NoCatAuth directory, run 'make authserv'.  This will install the
+important pieces of the Auth service.
+
+
+4. Run 'make pgpkey'.  The defaults should be fine for most purposes. 
+IMPORTANT: do NOT enter a passphrase!  Otherwise, you will get strange
+messages when the auth service attempts to encrypt messages, and tries to
+read your passphrase from a non-existent tty.
+
+
+5. Edit the /usr/local/nocat/nocat.conf file to suit.  These parameters are
+required:
+    
+  DataSource:  Currently, must be DBI or Passwd.  Use DBI for MySQL, or
+               Passwd for local file-based authentication.
+
+  If you're using DBI, then 'Database', 'DB_User', and 'DB_Passwd' are
+  required.  Database can be set to a full dbi string, like this: 
+
+    dbi:mysql:database=nocat;host=my.dbhost.net
+
+  DB_User and DB_Passwd define the db user's name and password, respectively.
+
+  If you're using Passwd as a DataSource,  'UserFile', 'GroupUserFile', and
+  'GroupAdminFile' are required (and the defaults are probably sane enough.)
+
+Also, if you intend to run the Auth service on the same subnet (or the same
+machine) as your gateway, then set LocalGateway to the IP address of the
+gateway.  Currently, only one gateway is supported when running in this
+mode.  This is really only useful for running the whole system behind a NAT,
+or on a network without internet access.  Note that this option requires the
+Net::Netmask perl module (available from CPAN).
+
+We STRONGLY recommend running your auth service on some machine other than
+your gateway box.  We have tried to cover every eventuality, but the fact
+remains that a gateway allows anonymous, non-present people to interact with
+your server.  As the whole security of the auth system is hinging on keeping
+your SSL and gpg private keys secure, please consider whether you really
+want to directly connect a radio to the box that they're housed on.  The
+Auth system machine should be treated as you would any other server that
+houses sensitive data.
+
+
+6. Make sure that /usr/local/nocat/pgp and pgp/* are owned by the user that
+your web server runs as (usually 'www', or sometimes 'nobody').  If not, you
+will get odd gpg permissions errors when running the auth service.
+
+
+7. Add etc/httpd.conf (from the distribution) to your Apache's
+httpsd.conf.  You can use a regular 'Include' line, if you like.  If you're
+not using Apache, add the equivalent to your server's configuration file.
+
+Check the paths in etc/httpd.conf, and read the comments.  Also make sure
+/that usr/local/nocat/cgi-bin is served from somewhere on your webserver
+(probably on a VirtualHost, if you're using Apache.)
+
+
+8. Create your authentication source, and add some users.
+
+8a. DBI:  First, make a new database (with 'mysqladmin create nocat', for
+example.)  Then, import the table schemas from etc/nocat.schema, like this:
+
+  $ mysql nocat < etc/nocat.schema
+
+This should run without error.  If not, make sure that you specified the
+proper host and user info; otherwise check your mysql installation.  Then
+run bin/admintool to create new users and group admins.
+
+8b. Passwd:  Default (empty) password files have been provided.  Simply run
+bin/admintool to create new users and group admins.
+
+
+9. Copy your /usr/local/nocat/trustedkeys.gpg to ALL of your gateways.  If
+you don't do this, then you'll get 'Bad authentication message' entries in
+your gateway logs.
+
+
+10. Restart your apache, and give it a try...
+
+
+That's it.  Check your logs, take your time, and have fun.  If you're
+running your own service, you should definitely join the NoCat mailing list. 
+Details are online at http://nocat.net/.
+
+Work is actively in progress to integrate a single shared membership database
+for the various wireless groups that have expressed an interest in
+participating. If you're starting a community wireless network of your own,
+and might be interested in roaming agreements with other groups, drop us a
+line at authservice@nocat.net.
+
+##
+# Thanks to Sameer Verma, Michael Bailey, and everyone else who has
+# posted installation problems and suggestions.  We're nearing 1.0!
+#

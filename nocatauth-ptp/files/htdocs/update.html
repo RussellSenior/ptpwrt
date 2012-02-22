@@ -1,0 +1,72 @@
+<html>
+<body bgcolor="#FFFFFF" text="#000000">
+<h1><img src="/images/auth_logo.gif" width="112" height="35"></h1>
+<h1><font face="Arial, Helvetica, sans-serif" size="3"><b>Update Your Account</b></font></h1>
+<p><font face="Verdana, Arial, Helvetica, sans-serif" size="1">$Message</font></p>
+<form method="post" action="$CGI">
+  <table border="0" cellpadding="5" cellspacing="0">
+    <tr valign="middle"> 
+      <td align="right"><font face="Verdana, Arial, Helvetica, sans-serif" size="2">E-mail:</font></td>
+      <td> 
+        <input type="text" name="user" value="$user" size="20" maxlength="255"></td>
+</tr>
+    <tr valign="middle"> 
+      <td align="right"><font face="Verdana, Arial, Helvetica, sans-serif" size="2">Current 
+        Password:</font></td>
+      <td> 
+        <input type="password" name="pass" value="$pass" size="20" maxlength="255"></td>
+</tr>
+<tr>
+      <td align="right" valign="top"><font face="Verdana, Arial, Helvetica, sans-serif" size="2">Name:</font></td>
+      <td><font face="Verdana, Arial, Helvetica, sans-serif" size="2">$name</font></td>
+</tr>
+<tr>
+      <td height="32">&nbsp;</td>
+      <td height="32"> <input type="image" name="update" src="/images/update.gif" width="55" height="17" border="0">
+      </td>
+</tr>
+<tr>
+      <td colspan="2" height="63">
+<hr />
+        <font face="Verdana, Arial, Helvetica, sans-serif" size="2"><b><font face="Arial, Helvetica, sans-serif" size="3"><br>
+        You may optionally change your password.<br>
+        </font></b></font></td>
+</tr>
+    <tr> 
+      <td align="right" valign="middle"><font face="Verdana, Arial, Helvetica, sans-serif" size="2">New 
+        Password:</font></td>
+      <td valign="middle"> 
+        <input type="password" name="npass" value="$npass" size="20" maxlength="255"></td>
+</tr>
+    <tr> 
+      <td align="right" valign="middle"><font face="Verdana, Arial, Helvetica, sans-serif" size="2">New 
+        Password again:</font></td>
+      <td valign="middle"> 
+        <input type="password" name="npass2" value="$npass2" size="20" maxlength="255"></td>
+</tr>
+<tr>
+      <td colspan="2" height="50"> 
+        <hr />
+      </td>
+</tr>
+<tr>
+      <td align="right" valign="middle" height="50"><font face="Verdana, Arial, Helvetica, sans-serif" size="2">URL:</font></td>
+      <td height="50">
+<input type="text" name="url" value="$url" size="35" maxlength="255"></td>
+</tr>
+<tr>
+      <td align="right" valign="top"><font size="2" face="Verdana, Arial, Helvetica, sans-serif">Description:</font></td>
+      <td> <font size="1" face="Verdana, Arial, Helvetica, sans-serif">Please 
+        tell us a little bit about yourself.<br />
+        <textarea name="description" cols="35" rows="5" wrap="virtual">$description</textarea>
+        </font><font size="1"> </font> </td>
+</tr>
+<tr>
+  <td>&nbsp;</td>
+      <td> <input type="image" name="update" src="/images/update.gif" width="55" height="17" border="0">
+      </td>
+</tr>
+</table>
+</form>
+</body>
+</html>

@@ -1,0 +1,28 @@
+<html>
+<head>
+    <title>NoCat login agent</title>
+    <meta http-equiv="Refresh" content="$redirect" />
+</head>
+<script language="JavaScript">
+    setTimeout( "document.RenewalForm.submit()", $timeout * 1000 );
+</script>
+<body bgcolor="#FFFFFF">
+<p><a href="http://nocat.net" target="_blank"><img src="/images/auth_logo.gif" width="112" height="35" border="0"></a> </p>
+<p><font face="Verdana, Arial, Helvetica, sans-serif" size="1">Keep this window 
+  open, and your authentication will automatically be renewed within $timeout 
+  seconds. This window may be safely minimized. </font></p>
+<p align="center">
+<form method="post" action="$logout">
+  <input type="image" name="mode_logout" src="/images/logout.gif" width="55" height="17" border="0"> 
+</form>
+<form name="RenewalForm" action="$CGI" method="post">
+    <input type="hidden" name="mode" value="renew">
+    <input type="hidden" name="user" value="$user">
+    <input type="hidden" name="pass" value="$pass">
+    <input type="hidden" name="mac" value="$mac">
+    <input type="hidden" name="token" value="$token">
+    <input type="hidden" name="gateway" value="$gateway">
+    <input type="hidden" name="timeout" value="$timeout">
+</form>
+</body>
+</html>

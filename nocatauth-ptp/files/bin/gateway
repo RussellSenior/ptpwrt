@@ -1,0 +1,85 @@
+#!/usr/bin/perl -w
+
+use POSIX qw(setsid);
+use Getopt::Std;
+use FindBin;
+
+use lib "$FindBin::Bin/../lib";
+use NoCat;
+use strict;
+
+# Gracefully handle termination signals.
+$SIG{INT} = sub { exit };
+
+# Note that gateway now closes and re-opens its logfile on SIGHUP.
+
+# Set some default path values.
+$ENV{PATH} = "$ENV{PATH}:/sbin:/usr/sbin:/usr/local/sbin";
+
+# Chdir home.
+chdir( "$FindBin::Bin/.." );
+
+# Get the command-line arguments:
+my %opt; getopts( "?RDFf:" => \%opt );
+
+if ( $opt{"?"} ) {
+    die <<End;
+NoCat gateway command-line arguments:
+    -D		Debug mode. Gateway forks a child that actually
+		performs the gateway functions.
+    -F		Foreground mode. Don't fork into the background.
+    -R		Reset firewall and exit.
+    -f <file>	Use the specified file instead of nocat.conf.
+    -?		This, obviously.
+End
+}
+
+# Load the gateway object.
+my $config = $opt{f} || $ENV{NOCAT}; 
+my $server = NoCat->gateway( ConfigFile => $config );
+
+# Reset the firewall.
+$server->log( 6, "Resetting firewall." );
+$server->firewall->initialize;
+exit if $opt{R}; # We're done now, if -R.
+
+# See if we can bind the listener port.
+exit 1 unless $server->bind_socket;
+
+# Set up the requisite logs.
+$server->open_log;
+
+$server->log( 1, "Gateway running on port $server->{GatewayPort}." );
+
+# Daemonize, unless we're told not to.
+unless ( $opt{F} ) {
+    if ( my $pid = fork ) {
+	exit;
+    } elsif ( not defined $pid ) {
+	die "Can't fork: $!";
+    }
+    setsid;
+}
+
+# Fork a child process and watch it, if we're in debug mode.
+if ( $opt{D} ) {
+    if ( my $pid = fork ) {
+	1 until waitpid( $pid, 0 );
+	$server->log( 0, "NOTE: Gateway returned", $? >> 8, 
+	    "on signal", $? & 127 );
+    } elsif ( not defined $pid ) {
+	die "Can't fork: $!";
+    } else {
+	$server->run;
+    }
+} else {
+# otherwise, just run the gateway.
+    $server->run;
+}
+
+END {
+    unless (getppid) {
+        NoCat->log( 0, "Resetting firewall to initial settings." );
+        NoCat->firewall->reset;
+    }
+}

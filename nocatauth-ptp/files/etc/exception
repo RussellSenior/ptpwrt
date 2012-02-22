@@ -1,0 +1,21 @@
+#!/bin/sh
+##
+# Set a permanent exception to the NoCat rules.
+# 
+# This is useful to run at boot time, after you load the firewall
+# modules, but before bin/gateway runs.
+#
+if [ -z "$1" -o -z "$2" ]; then
+  echo "Usage:  $0 [ host ] [ mac address ]"
+  echo
+  echo "Adds a host + MAC to the exception list for NoCat.  Any machine"
+  echo "specified by this utility won't have to login, and will be granted"
+  echo "owner status."
+  exit 1
+fi
+
+echo "iptables -t mangle -A PREROUTING -m mac --mac-source $2 -s $1 -j MARK --set-mark 1"
+iptables -t mangle -A PREROUTING -m mac --mac-source $2 -s $1 -j MARK --set-mark 1
+
+echo "iptables -t filter -I FORWARD -d $1 -j ACCEPT"
+iptables -t filter -I FORWARD -d $1 -j ACCEPT

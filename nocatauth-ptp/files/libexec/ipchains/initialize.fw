@@ -1,0 +1,146 @@
+#!/bin/sh
+##
+#
+# initialize.fw: setup the default firewall rules
+#
+# *** NOTE ***
+#
+# If you want to have local firewall rules in addition to what NoCat
+# provides, add them at the bottom of this file.  They will be recreated
+# each time gateway is restarted.
+#
+##
+
+# The current service classes by fwmark are:
+#
+#  1: Owner
+#  2: Co-op
+#  3: Public
+#  4: Free
+
+# Note: your PATH is inherited from the gateway process
+#
+
+# Enable IP forwarding and rp_filter (to kill IP spoof attempts).
+#
+echo "1" > /proc/sys/net/ipv4/ip_forward
+echo "1" > /proc/sys/net/ipv4/conf/all/rp_filter
+
+# Load alllll the kernel modules we need.
+#
+modprobe ipchains > /dev/null 2>&1
+
+reset_chain () {
+    ipchains -N $1 2>/dev/null
+    ipchains -F $1
+    ipchains -D $2 -j $1 2>/dev/null
+    ipchains -A $2 -j $1
+}
+
+# Flush all user-defined chains
+#
+reset_chain NoCat      forward
+reset_chain NC_Ports   NoCat
+reset_chain NC_NAT     NoCat
+reset_chain NC_Redir   input
+reset_chain NC_Auth    NC_Redir 
+
+fwd="ipchains	    -A NoCat"
+ports="ipchains	    -A NC_Ports"
+redirect="ipchains  -A NC_Redir"
+
+# configure packet routing
+#
+if [ "$RouteOnly" ]; then
+    masq="ACCEPT"
+else
+    masq="MASQ"
+fi
+
+# Handle tagged traffic.
+#
+for net in $LocalNetwork; do
+    # Allow web traffic to the specified hosts, and don't capture
+    # connections intended for them.
+    #
+    if [ "$AuthServiceAddr" -o "$AllowedWebHosts" ]; then 
+	for host in $AuthServiceAddr $AllowedWebHosts; do
+	    for port in 80 443; do
+		$fwd      -p tcp -s $net -d $host $port -j $masq 
+		$fwd      -p tcp -d $net -s $host $port -j ACCEPT
+    		$redirect -p tcp -s $net -d $host $port -j ACCEPT
+	    done
+	done
+    fi
+
+    # Accept forward and back traffic to/from DNSAddr
+    if [ "$DNSAddr" ]; then
+	for a in $DNSAddr; do
+  	    $fwd -p tcp -s $net -d $a 53 -j $masq 
+	    $fwd -p tcp -d $net -s $a 53 -j ACCEPT
+	    $fwd -p udp -s $net -d $a 53 -j $masq 
+	    $fwd -p udp -d $net -s $a 53 -j ACCEPT
+	done
+    fi
+
+    # Redirect outbound non-auth web traffic to the local gateway process
+    #
+    for port in 80 443; do
+	$redirect -p tcp -s $net -d 0.0.0.0/0 $port -j REDIRECT $GatewayPort
+    done
+done
+
+# Lock down more ports for public users, if specified. Port restrictions
+# are not applied to co-op and owner class users.
+#
+# There are two philosophies in restricting access:  That Which Is Not
+# Specifically Permitted Is Denied, and That Which Is Not Specifically
+# Denied Is Permitted.
+#
+# If "IncludePorts" is defined, the default policy will be to deny all
+# traffic, and only allow the ports mentioned.
+#
+# If "ExcludePorts" is defined, the default policy will be to allow all
+# traffic, except to the ports mentioned.
+#
+# If both are defined, ExcludePorts will be ignored, and the default policy
+# will be to deny all traffic, allowing everything in IncludePorts, and
+# issue a warning.
+#
+if [ "$IncludePorts" ]; then
+  if [ "$ExcludePorts" ]; then
+    echo "Warning: ExcludePorts and IncludePorts are both defined."
+    echo "Ignoring 'ExcludePorts'.  Please check your nocat.conf."
+  fi
+
+  # Enable all ports in IncludePorts
+  for net in $LocalNetwork; do
+    for port in $IncludePorts; do
+      $ports -p tcp -s $net -d 0.0.0.0/0 $port -j RETURN
+      $ports -p udp -s $net -d 0.0.0.0/0 $port -j RETURN
+    done
+
+    # ...and disable access to the rest.
+    $ports -s $net -j DENY
+  done
+
+elif [ "$ExcludePorts" ]; then
+  # If ExcludePorts has entries, simply deny access to them.
+  for net in $LocalNetwork; do
+    for port in $ExcludePorts; do
+	$ports -p tcp -s $net -d 0.0.0.0/0 -j DENY
+	$ports -p udp -s $net -d 0.0.0.0/0 -j DENY
+    done
+  done
+fi
+  
+# Filter policy.
+$fwd -j DENY
+
+##
+# Add any other local firewall rules below.
+##
+
+#
+# Ende
+#

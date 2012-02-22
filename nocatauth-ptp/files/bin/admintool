@@ -1,0 +1,157 @@
+#!/usr/bin/perl -w
+
+# Make NOCAT environment variable is set to wherever
+# your nocat.conf is installed...
+# 
+use FindBin;
+use Getopt::Std;
+use lib "$FindBin::Bin/../lib";
+use strict;
+my $VERSION = "0.10";
+
+#####
+#
+
+sub usage {
+  die <<EndOfUsage;
+Usage: admintool [-c|-p] [User] [Password]
+       admintool [-a|-d|-A|-D] [User] [Group]
+       admintool -l [Group]	
+
+  -c	Create a new user with the specified password
+  -p    Change a user's password to the specified password
+
+  -a	Add user to the specified group
+  -d	Remove user entirely from specified group
+  -A	Grant admin privileges to user for group
+  -D	Strip admin privileges from user for group
+
+  -l	List users in the specified group
+
+  -q 	Quiet (don't print report headers)
+  -v	Version info
+  -h	This help
+
+EndOfUsage
+
+}
+
+sub version {
+  die "admintool of the NoCatAuth package, v$VERSION\n";
+}
+
+my %opts;
+getopts('hvc:p:l:a:d:A:D:', \%opts);
+
+($opts{h}) && usage;
+
+($opts{v}) && version;
+
+#
+#####
+
+require NoCat;
+
+my $nocat = NoCat->new( ConfigFile => $ENV{NOCAT} );
+
+#####
+#
+# List admins for the given group?
+#
+if($opts{l}) {
+  my $group = $nocat->group;
+
+  $group->fetch( $opts{l} );
+
+  my $gu = $group->users;
+
+  (! keys(%$gu)) && die "Couldn't find any users for '",$group->id,"'.  Check your spelling?\n";
+
+  (! $opts{q}) && print "Users in group '",$group->id,"' (* = admin):\n";
+  for my $u ( keys(%$gu) ) {
+    print $u, ( $gu->{$u} ? "*" : "" ), "\n";
+  }
+
+  exit 0;
+}
+
+# Add or drop, then?
+#
+if( my $u = $opts{a} || $opts{d} || $opts{A} || $opts{D} ) {
+  my $g = shift(@ARGV);
+
+  (!$g) && usage;
+
+  my $group = $nocat->group->fetch( $g );
+  !($group->id) && die "Can't find group '$g'!\n";
+
+  my $user = $nocat->user->fetch( $u );
+  !($user->id) && die "Can't find user '$u'!\n";
+
+  # Are we dropping admin privs?
+  #
+  if($opts{d}) {
+    (! exists $group->users->{$u}) && die "User '$u' is not a member of group '$g'!\n";
+    (!$opts{q}) && print "Dropping user '$u' from group '$g'\n";
+    $group->drop( $user );
+  }
+  elsif ($opts{D}) {
+    (!$group->users->{$u}) && die "User '$u' is not an admin of group '$g'!\n";
+    (!$opts{q}) && print "Removing admin privileges from user '$u' for group '$g'.\n";
+my $r =    $group->admin( $user => 0 );
+    warn "user $u of group $g is $r\n";
+  } 
+  elsif ($opts{a}) {
+    ( exists $group->users->{$u} ) && die "User '$u' is already a member of group '$g'!\n";
+    (!$opts{q}) && print "Adding user '$u' to group '$g'.\n";
+    $group->add( $user => 0 );
+  }
+  else { # $opts{A} 
+    (!$opts{q}) && print "Granting admin privileges to user '$u' for group '$g'\n";
+    $group->add( $user => 1 );
+  }
+
+  $group->store;
+
+  exit 0;
+}
+
+if (my $u = $opts{c} || $opts{p}) {
+  my $pass = shift( @ARGV ) or die "You must specify a password!\n";
+  my $user = $nocat->user->fetch( $u );
+
+  if ( $opts{c} ) {
+    $user->id && die "User '$u' already exists! Did you mean to use the -p (password) option?\n";
+    $user->id( $u );
+    $user->passwd( $pass );
+    $user->create;
+  } else {
+    ( ! $user->id ) && die "Can't find user '$u'! Did you mean to use the -c (create) option?\n";
+    $user->passwd( $pass );
+    $user->store;
+  }
+
+  (! $opts{q}) && print "Password set for user '$u'.\n";
+  exit 0;
+}
+
+# Got here?  You shouldn't have.
+#
+usage;
+
+__END__
+
+my $user = new NoCat->user( ConfigFile => $nc );
+
+
+$user->fetch( $opts{l} );
+
+print "Found user: ",$user->id(),"\n";
+
+#$user->set(
+#  User => $ARGV[0],
+#  Pass => $ARGV[1],
+#  Status => $ARGV[2]
+#  
+# );
+#

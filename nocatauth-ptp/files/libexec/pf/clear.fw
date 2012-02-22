@@ -1,0 +1,6 @@
+#!/bin/sh
+
+# Note: your PATH is inherited from the gateway process
+#
+
+pfctl -F all

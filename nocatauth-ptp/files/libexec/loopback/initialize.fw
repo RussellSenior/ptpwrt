@@ -1,0 +1,41 @@
+#!/bin/sh
+
+# Note: your PATH is inherited from the gateway process
+#
+
+GatewayAddr=127.0.0.1
+GatewayPort=5280
+
+# Enable IP forwarding.
+#
+echo "1" > /proc/sys/net/ipv4/ip_forward
+
+iptables -t filter -P OUTPUT ACCEPT
+
+#
+# Flush all user-defined chains
+#
+for table in filter nat mangle; do
+    iptables -t $table -N NoCat 2>/dev/null
+    iptables -t $table -F NoCat
+    iptables -t $table -D OUTPUT -j NoCat 2>/dev/null
+    iptables -t $table -A OUTPUT -j NoCat
+done
+
+#
+# Only forward tagged traffic per class
+#
+# iptables -t filter -A OUTPUT -j LOG --log-level debug
+iptables -t filter -A NoCat -m mark --mark 1 -j RETURN
+iptables -t filter -A NoCat -p tcp -d $GatewayAddr --dport $GatewayPort -j ACCEPT
+iptables -t filter -A NoCat -p tcp -s $GatewayAddr --sport $GatewayPort -j ACCEPT
+iptables -t filter -A NoCat -j DROP
+
+#
+# Redirect outbound non-auth web traffic to the local gateway process
+#
+iptables -t nat -A NoCat -m mark --mark 1 -j RETURN
+iptables -t nat -A NoCat -p tcp --dport 80  -j REDIRECT --to-port $GatewayPort
+iptables -t nat -A NoCat -p tcp --dport 443 -j REDIRECT --to-port $GatewayPort
+
+

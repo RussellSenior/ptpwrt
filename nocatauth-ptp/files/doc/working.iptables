@@ -1,0 +1,25 @@
+NAT table:
+Chain PREROUTING (policy ACCEPT)
+target     prot opt source               destination         
+LOG        all  --  0.0.0.0/0            0.0.0.0/0          MARK match 0x4 LOG flags 4 level 7 
+REDIRECT   tcp  --  0.0.0.0/0           !208.201.239.9      MARK match 0x4 tcp dpt:80 redir ports 5280 
+ACCEPT     all  --  0.0.0.0/0            0.0.0.0/0          
+
+Chain POSTROUTING (policy ACCEPT)
+target     prot opt source               destination         
+MASQUERADE  all  --  10.0.1.0/24          0.0.0.0/0          MARK match 0x1 
+MASQUERADE  all  --  10.0.1.0/24          0.0.0.0/0          MARK match 0x2 
+MASQUERADE  all  --  10.0.1.0/24          0.0.0.0/0          MARK match 0x3 
+MASQUERADE  all  --  10.0.1.0/24          208.201.239.9      MARK match 0x4 
+
+Chain OUTPUT (policy ACCEPT)
+target     prot opt source               destination         
+
+Mangle table:
+Chain PREROUTING (policy ACCEPT)
+target     prot opt source               destination         
+MARK       all  --  0.0.0.0/0            0.0.0.0/0          MARK set 0x4 
+MARK       all  --  10.0.1.107           0.0.0.0/0          MAC 00:A0:24:AB:EF:B4 MARK set 0x1 
+
+Chain OUTPUT (policy ACCEPT)
+target     prot opt source               destination         

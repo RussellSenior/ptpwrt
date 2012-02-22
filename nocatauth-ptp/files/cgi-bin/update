@@ -1,0 +1,83 @@
+#!/usr/bin/perl -w
+
+###
+##
+# update  
+#
+# User info update script.
+#
+# RJF & SDE, 7.6.01 
+#
+# License: GPL.
+##
+###
+
+#use lib '/usr/local/nocat/lib'; 
+use lib '../lib';
+use NoCat;
+use strict;
+
+my $authserv	= NoCat->auth_service( ConfigFile => $ENV{NOCAT} );
+my $cgi		= $authserv->cgi;
+my %params	= $cgi->Vars;
+
+sub respond { $authserv->display( UpdateForm => @_ ) }
+
+$authserv->check_config(qw(
+    UpdateForm UpdateGreeting UserIDField UpdateBadUser UpdateBadPass
+    UpdateInvalidPass UpdatePassNoMatch MinPasswdLength UpdateFields UpdateSuccess
+));
+
+##
+# Have we filled in the form yet?  No?  If not, present one.
+##
+
+respond "UpdateGreeting" unless $params{"update"} or $params{"update.x"};
+
+##
+# Do we know this joker?
+##
+
+my $user = $authserv->user->fetch( $params{user} );
+
+respond "UpdateBadUser" unless $user and $user->id;
+respond "UpdateBadPass" unless $user->authenticate( $params{pass} );
+
+##
+# Does this user want to reset their password? Be careful.
+##
+
+if ( $params{npass} ) {
+    respond "UpdateInvalidPass" if length $params{npass} < $authserv->{MinPasswdLength};
+    respond "UpdatePassNoMatch" if $params{npass} and $params{npass} ne $params{npass2};
+
+    ( $params{pass} ) = delete @params{qw{ npass npass2 }};
+
+    $user->set_password( $params{pass} );
+}
+
+##
+# Set any incidental fields.
+## 
+
+my @fields = grep( $params{lc $_}, split( /\s/, $authserv->{UpdateFields} ));
+
+for my $f ( @fields  ) {
+    $user->set( $f => $params{lc $f} ) if defined $params{lc $f};
+}
+
+if ( @fields ) {
+    $user->store;
+}
+
+##
+# Finally, notify the user as to the outcome.
+##
+
+$cgi->param( lc($_) => $user->data->{$_} ) for keys %{$user->data};
+$cgi->param( pass => $params{pass} );
+$cgi->delete( "npass" );	
+$cgi->delete( "npass2" );	
+
+
+respond( @fields ? "UpdateSuccess" : "UpdateGreeting" );

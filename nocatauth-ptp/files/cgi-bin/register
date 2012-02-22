@@ -1,0 +1,75 @@
+#!/usr/bin/perl -w
+
+###
+##
+# register 
+#
+# User registration script.
+#
+# RJF & SDE, 7.4.01 
+#
+# License: GPL.
+##
+###
+
+#use lib '/usr/local/nocat/lib'; # or wherever.
+use lib '../lib';
+use NoCat;
+use strict;
+
+my $authserv	= NoCat->auth_service( ConfigFile => $ENV{NOCAT} );
+my $cgi		= $authserv->cgi;
+my %params	= $cgi->Vars;
+
+$authserv->check_config(qw(
+    RegisterForm RegisterGreeting RegisterUserExists RegisterBadUser
+    RegisterInvalidPass RegisterPassNoMatch RegisterFields RegisterSuccess
+    UserIDField UserPasswdField
+));
+
+sub respond { $authserv->display( RegisterForm => @_ ) }
+
+##
+# Have we filled in the form yet?  No?  If not, present one.
+##
+
+respond "RegisterGreeting" unless $params{register} or $params{"register.x"};
+
+##
+# Are we just missing required fields?
+##
+
+respond "RegisterMissing" unless grep( $_, @params{qw{ user name pass pass2 }} ) == 4;
+
+##
+# Does the user already exist, is the username not an e-mail address, 
+# is the password too short, do the passwords not match?
+##
+
+my $user = $authserv->user->fetch( $params{user} );
+
+respond "RegisterUserExists"	if $user->id;
+respond "RegisterBadUser"	unless $params{user} =~ /^[\w.+-]+\@[\w.-]+\.[\w.]+$/o;
+respond "RegisterInvalidPass"	if length $params{pass} < $authserv->{MinPasswdLength};
+respond "RegisterPassNoMatch"	if $params{pass} ne $params{pass2};
+
+##
+# Finally, notify the user as to the outcome.
+##
+
+my @fields = grep($_, split( /\s/, $authserv->{RegisterFields} ));
+
+for my $f ( @fields  ) {
+    $user->set( $f => $params{lc $f} ) if defined $params{lc $f};
+}
+
+$user->set( 
+    $authserv->{UserIDField}	 => $params{user},
+    $authserv->{UserPasswdField} => $params{pass}
+);
+
+$user->create;
+
+$authserv->success( RegisterOKForm => \%params );
+
+# Fin

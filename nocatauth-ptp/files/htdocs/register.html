@@ -1,0 +1,49 @@
+<html>
+<body bgcolor="#FFFFFF" text="#000000">
+<p><a href="http://nocat.net"><img src="/images/auth_logo.gif" width="112" height="35" border="0"></a></p>
+<p><font face="Arial, Helvetica, sans-serif" size="3"><b>Register an Account</b></font> 
+</p>
+<p><font face="Verdana, Arial, Helvetica, sans-serif" size="1">$Message</font></p>
+<form method="post" action="$CGI">
+<input type="hidden" name="redirect" value="$redirect" />
+  <table border="0" cellpadding="5" cellspacing="0">
+    <tr>
+      <td align="right" valign="top"><font face="Verdana, Arial, Helvetica, sans-serif" size="2">E-mail:</font></td>
+  <td>
+    <input type="text" name="user" value="$user" size="20" maxlength="255">
+    <br />
+        <i><font face="Verdana, Arial, Helvetica, sans-serif" size="1">(This will 
+        serve as your login ID.)</font></i> </td>
+</tr>
+<tr>
+      <td align="right" valign="top"><font size="2" face="Verdana, Arial, Helvetica, sans-serif">Name:</font></td>
+  <td><input type="text" name="name" value="$name" size="35" maxlength="255"></td>
+</tr>
+<tr>
+      <td align="right" valign="top"><font face="Verdana, Arial, Helvetica, sans-serif" size="2">Password:</font></td>
+  <td><input type="password" name="pass" value="$pass" size="20" maxlength="255"></td>
+</tr>
+<tr>
+      <td align="right" valign="top"><font face="Verdana, Arial, Helvetica, sans-serif" size="2">Password 
+        again:</font></td>
+  <td><input type="password" name="pass2" value="$pass2" size="20" maxlength="255"></td>
+</tr>
+<tr>
+      <td align="right" valign="top"><font face="Verdana, Arial, Helvetica, sans-serif" size="2">URL:</font></td>
+  <td><input type="text" name="url" value="$url" size="35" maxlength="255"></td>
+</tr>
+<tr>
+      <td align="right" valign="top"><font face="Verdana, Arial, Helvetica, sans-serif" size="2">Description:</font></td>
+      <td> <font face="Verdana, Arial, Helvetica, sans-serif" size="1">Please 
+        tell us a little bit about yourself.</font><br />
+    <textarea name="description" cols="35" rows="5" wrap="virtual">$description</textarea>
+  </td>
+</tr>
+<tr>
+      <td height="32">&nbsp;</td>
+      <td height="32"> <input type="image" src="/images/register.gif" name="register" width="55" height="17" border="0"></td>
+</tr>
+</table>
+</form>
+</body>
+</html>

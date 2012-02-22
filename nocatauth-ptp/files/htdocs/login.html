@@ -1,0 +1,33 @@
+<html>
+<body bgcolor=#FFFFFF text=000000>
+<font face="Verdana, Arial, Helvetica, sans-serif" size="2">$Message</font>
+<form method="post" action="$CGI">
+<table border=0 cellpadding=5 cellspacing=0>
+<tr>
+  <td align=right><font face="Verdana, Arial, Helvetica, sans-serif" size="2">Login:</font></td>
+  <td><input type="text" name="user" value="$user" size="20" maxlength="255"></td>
+</tr>
+<tr>
+  <td align=right><font face="Verdana, Arial, Helvetica, sans-serif" size="2">Password:</font></td>
+  <td><input type="password" name="pass" value="$pass" size="20" maxlength="255"></td>
+</tr>
+<tr>
+      <td align=center colspan=2 height="23"><input type="image" name="mode_login" src="/images/login.gif" width="55" height="17" border="0"></td>
+</tr>
+<tr>
+      <td colspan=2 align=center height="23"><input type="image" name="mode_skip" src="/images/skip.gif" width="55" height="17" border="0"></td>
+</tr>
+<tr><td colspan="2">
+    <font face="Verdana, Arial, Helvetica, sans-serif" size="1">Don't have an account? <a href="register?redirect=$redirect">Register here!</a></font>
+</td></tr>
+</table>
+    <input type="hidden" name="mac" value="$mac">
+    <input type="hidden" name="token" value="$token">
+    <input type="hidden" name="redirect" value="$redirect">
+    <input type="hidden" name="gateway" value="$gateway">
+    <input type="hidden" name="timeout" value="$timeout">
+</form>
+  <p><img src="/images/auth_logo.gif" width="112" height="35"> 
+<p>
+</body>
+</html>

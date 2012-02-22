@@ -1,0 +1,80 @@
+# MySQL dump 8.12
+#
+# Host: localhost    Database: nocat
+#--------------------------------------------------------
+# Server version	3.23.33
+
+#
+# Table structure for table 'EventLog'
+#
+
+CREATE TABLE eventlog (
+  id int(10) unsigned NOT NULL auto_increment,
+  class tinyint(3) unsigned NOT NULL default '0',
+  severity tinyint(3) unsigned NOT NULL default '0',
+  event varchar(255) default NULL,
+  created datetime default NULL,
+  PRIMARY KEY (id)
+);
+
+#
+# Table structure for table 'Hardware'
+#
+
+CREATE TABLE hardware (
+  id int(10) unsigned NOT NULL auto_increment,
+  mac varchar(17) default NULL,
+  owner int(10) unsigned NOT NULL default '0',
+  description varchar(255) default NULL,
+  created datetime default NULL,
+  modified timestamp(14) NOT NULL,
+  PRIMARY KEY (id)
+);
+
+#
+# Table structure for table 'Member'
+#
+
+CREATE TABLE member (
+  url varchar(255) default NULL,
+  description text,
+  created datetime default NULL,
+  modified timestamp(14) NOT NULL,
+  status tinyint(3) unsigned default NULL,
+  login varchar(250) NOT NULL default '',
+  pass varchar(255) NOT NULL default '',
+  name varchar(255) default NULL,
+  PRIMARY KEY (login)
+);
+
+#
+# Table structure for table 'Group'
+#
+
+CREATE TABLE network  (
+    login varchar(250) not null,
+    network varchar(250) not null,
+    admin char(1) default '',
+    created datetime default NULL,
+    modified timestamp(14) NOT NULL,
+    PRIMARY KEY (login, network)
+);
+
+#
+# Table structure for table 'Node'
+#
+
+CREATE TABLE node (
+  id int(10) unsigned NOT NULL auto_increment,
+  owner int(10) unsigned NOT NULL default '0',
+  address varchar(255) default NULL,
+  service tinyint(3) unsigned default NULL,
+  range tinyint(3) unsigned default NULL,
+  bandwidth tinyint(3) unsigned default NULL,
+  created datetime default NULL,
+  modified timestamp(14) NOT NULL,
+  lat float default NULL,
+  lon float default NULL,
+  PRIMARY KEY (id)
+);
+

@@ -1,0 +1,50 @@
+ConfigFile <file>	
+	-- Configuration file path. Config directives will be read from this file. 
+
+AuthServiceURL <URL>	
+	-- URL to auth service login.
+
+GatewayAddr <IP> | <IP:Port>	
+	-- Gateway IP address. Attempts to bind to all addresses if none is specified. 
+	-- Port can be optionally specified, e.g. GatewayAddr 10.0.0.1:5280
+
+GatewayPort <Port>
+	-- Gateway TCP port. Use this to specify port if no GatewayAddr is specifically designated.
+
+ListenQueue <n>
+	-- Specify listen queue size. Defaults to 10.
+
+LoginTimeout <n>
+	-- Number of seconds before a user login times out on the gateway.
+
+Owners <owner1> [<owner2> ...]
+	-- Space separated list of user IDs considered to be node "owners".
+
+OwnersFile <file>
+	-- A file that lists node owners by user ID, one per line. IDs must start with an alphanumeric.
+
+PermitPublic <cmd>
+PermitMember <cmd>
+PermitOwner <cmd>
+DenyAccess <cmd>
+	-- Firewall commands to execute from a shell to permit or deny a user of a given class.
+
+Database <dbispec>
+DB_User	<username>
+DB_Passwd <password>
+	-- Values to pass to perl's DBI to open a database connection. <dbispec> should take the form:
+	    dbi:mysql:database=authservice;host=dbserver or whatever's appropriate for your DB and setup.
+
+UserTable <table>
+	-- The SQL table containing the user auth data.
+
+UserIDField <column>
+	-- The SQL column containing a user's unique identifier, e.g. e-mail address.
+
+UserPasswdField <column>
+	-- The SQL column containing a user's MD5-hashed password.
+
+UserAuthField <column>
+	-- An SQL column containing a binary value denoting a user's membership with the auth service. Should be blank, zero, or null if a user is not a member, and anything else if a user is considered a member.
+
+

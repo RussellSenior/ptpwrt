@@ -1,0 +1,441 @@
+
+An introduction to the NoCatAuth system
+
+               -- or --
+
+"So, you want to run a wireless node"
+
+Last updated: January 9, 2002 by Rob Flickenger
+
+##
+## Note: this document currently makes no sense.  It's in progress.
+## Please disregard everything below.  Seriously.  --Rob
+##
+
+
+### Part 1: What is it? ###
+
+ 
+While some node owners are perfectly happy opening their networks to
+whomever happens to be in range, most of us hesitate at the thought of
+paying for our neighbors to use our bandwidth.  After all, apart from using
+up resources that we're paying for, anonymous users could potentially abuse
+other networks and have their shenanigans traced back to our network!  If
+we want to provide responsible wireless access, we need a way of securely
+identifying users when they connect, and then only allocate the resources
+that the node owner is willing to contribute.  After the Portland Summit,
+it was obvious that one key component that was missing from the community
+network idea was a freely available captive portal implementation.
+
+The idea behind a captive portal is fairly straightforward.  Rather than
+rely on the built-in security features of 802.11b to control who can
+associate with an AP, we configure the access point with no WEP, and as an
+open network.  The AP is also in bridged mode, and connected via a
+crossover cable to an ethernet card on a Linux router.  It is then up to
+the router to issue DHCP leases, throttle bandwidth, and permit access to
+other networks.  When a user attempts to browse to any web page, they are
+redirected to a page that presents the user with a login prompt and
+information about the node they are connected to.  If the wireless gateway
+has a method of contacting a central authority to determine the identity of
+the connected wireless user, then it can relax its firewall rules
+appropriately, allowing the privileges due to that user (for example, more
+bandwidth or access to other machines and ports).
+
+The NoCatAuth project implements such a third party authentication system
+(or Auth system, for short).  Written in Perl and C, it takes care of
+presenting the user with a login prompt, contacts a MySQL database to
+lookup user credentials, securely notifies the wireless gateway of the
+user's status, and authorizes further access.  On the gateway side, the
+software manages local connections, sets bandwidth throttling and firewall
+rules, and times out old logins after a user specified time limit.  The
+software is released under the GPL.
+
+Public Class
+
+Co-op Class
+
+Owner Class
+
+A Public Class user would be someone who knows nothing about the local
+wireless group, and simply is looking for access to the Internet.  This
+class is granted very little bandwidth, and users are restricted in what
+services they can access by the use of firewall rules.  The Public Class of
+user is given the opportunity to learn more about who is providing the
+wireless service, and how they can get in touch with the local group (and
+ultimately get more access).  They do not have personal logins, but must
+still authenticate by manually skipping the login process (hence the term
+catch and release, see below).
+
+The Co-op Class consists of users with pre-arranged login information.  The
+rules for membership should be determined by the local community groups,
+and are configured in the central Auth system database.  This class is
+typically granted much greater bandwidth and access to ports, as users can
+now be held accountable for their own actions.
+
+The Owner Class is much the same as the Co-op Class, but is reserved for
+the owner of a given node, and anyone else who they want to grant access
+to.  The Owner Class pre-empts traffic from all other classes and has free
+use of all network resources.
+
+The typical connection process looks like this:
+
+redirect
+
+User is immediately issued a lease, and their first web connection is
+redirected to the wireless gateway's service.
+
+A roaming user associates with the AP, and is immediately issued a DHCP
+lease.  All access beyond contacting the Auth service is denied by default.
+ When the user tries to browse the web, they are immediately redirected to
+the gateway service, which then redirects them to the Auth system's SSL
+login page (after appending a random token and some other information to
+the URL line).
+
+The user is then presented with three choices: either login with their pre-
+arranged login information, click on a link to find out more about
+membership, or click the "Skip Login" button.
+
+connect back
+
+After login, the Auth system connects back to the wireless gateway, and
+notifies it of the outcome.  The gateway can then decide whether or not to
+grant further access.
+
+Once the user has either logged in correctly or skipped the process, the
+Auth system then creates an outcome message, signs it with PGP, and sends
+it back to the wireless gateway.  The gateway has a copy of the Auth
+service's public PGP key, and can verify the authenticity of the message.
+As part of the data included in the response is the random token that the
+gateway originally issued to the client, it makes it very difficult to fake
+out the gateway with a "replay attack".  The digital signature prevents the
+possibility of other machines posing as the Auth service and sending bogus
+messages to the wireless gateway.
+
+Now, if all has gone well for the user, the wireless gateway modifies its
+firewall rules to grant further access, and redirects the user back to the
+site they were originally trying to browse to.
+
+pass through
+
+The user can now continue along their merry way.
+
+In order to keep the connection open, a small window is opened on the
+client side (via JavaScript) that refreshes the login page every few
+minutes.  Once the user moves out of range or quits their browser, the
+connection is reset and requires another manual login.
+
+The requirements on the gateway side are minimal (the system was designed
+to run under Linux 2.4.5, on a 486 with 16Mb ram).  The Auth service is
+designed to be administered by a community group that maintains its user
+database in whatever way they see fit.  For example, running a node is one
+obvious way to become a co-op member.  But that isn't always the best way
+to spend resources; people who contribute hardware, programming skill,
+bandwidth, or even meeting space and sandwiches should certainly be
+considered for membership.  The technical aspects of "catch and release"
+are being solved, and it's up to everyone to work on the social details.
+
+The NoCatAuth system is under active development.  You can always get the
+latest version from http://nocat.net.
+
+
+
+The NoCatAuth package is comprised two major components: a centralized
+Authentication system (or Auth system for short), and any number of wireless
+gateways that communicate with the Auth system.
+
+
+The NoCat Community Wireless Network Project
+
+Project requirements
+~~~~~~~~~~~~~~~~~~~~
+
+The goal of NoCat is to provide a mechanism for creating multiple classes of
+service for cooperative wireless networking.
+
+The three major components of the network are:
+
+* Roaming Clients
+
+* Wireless Gateways
+
+* Cooperative Authentication Services
+
+ 
+Roaming Clients are defined as:
+
+  * Any computer capable of wireless communication
+
+  * Optionally, also capable of authenticating themselves to the
+    Authentication Service
+
+
+Wireless Gateways are defined as:
+
+  * A computer capable of wireless communication that is also able to relay
+    traffic to the Internet
+
+  * Capable of verifying the authenticity of, and acting upon, messages
+    received from the Authentication Service
+
+
+Authentication Service is defined as:
+
+  * An internetworked service that maintains a database of cooperative
+    members and their credentials
+
+  * Capable of accepting incoming authentication attempts, and notifying
+    the origin gateway of the outcome of such attempts
+
+  * Having a really cool logo
+
+
+There are at least three potential classes of service:
+
+Priority
+
+Co-op member
+
+Public at large
+
+
+The Priority class is intended to allow the gateway owner (and anyone else
+they see fit) priority access to the gateway's resources.  This class is
+optional.
+
+The Co-op class is a standard class of service, accessible to all
+cooperative participants.  This class is mandatory.
+
+The Public class is open to any unauthenticated Roaming Client, and has the
+lowest access priority to gateway resources.  This class is also mandatory,
+but note that it may be defined at any Gateway as having no access
+whatsoever, except access to the Authentication Service, if so desired.
+
+
+Note that Cooperative membership criterion should be reached by consensus of
+the people intending to participate, and is beyond the scope of this paper.
+
+
+A final requirement of the system is that all authentication transactions
+are carried out in a cryptographically secure manner, and in a fashion that
+preserves trust relationships between all components.
+
+
+Specifications
+~~~~~~~~~~~~~~
+
+  Process Overview
+  ----------------
+
+  * For Public access, a Roaming Client, within range of a Wireless Gateway,
+    requests a DHCP lease.  The Gateway responds, and communication
+    commences.  Have a nice day.  (It is expected that the Gateway will be
+    configured to preempt this class in favor of higher priority traffic,
+    and will likely restrict services that this class has access to.)
+
+    See below for discussion on the roaming IP problem.
+
+    
+  * For all other access:
+    
+    -The Roaming Client requests, and immediately receives a lease.
+    
+    -The Client then makes an HTTPS POST request to the Authentication
+     Service (probably via an SSL enabled browser.)  The POST request
+     includes the member's login, password, and optional MAC address
+     information.
+
+    -The Authentication Service validates the request, and returns an
+     appropriate response to the Client.
+
+    -The Authentication Service then sends a PGP signed cleartext message to
+     the originating Gateway, containing the user's login, current MAC
+     address, and authentication status (yea or nay).  
+
+    -The Wireless Gateway receives the message and verifies it based on the
+     Authentication Service's public key.  It then decides if/how to modify
+     its firewall rules:
+
+      +If nay, do nothing (and probably log it...) effectively keeping
+       Public Class service
+      
+      +If yea and the login is a local Priority user, assign Priority Class
+       access to the IP matching the MAC address
+    
+      +If yea and the login is NOT a Priority user, assign Co-op Class
+       access
+
+    -The Client must then re-authenticate to the Service before a (per
+     Gateway) predetermined timeout period expires, or the Gateway will
+     revert the MAC back to Public class service.  The Client can
+     reauthenticate at any time, and is encouraged to before the timeout. 
+     (This can be facilitated by an automatic HTTP REFRESH sent by the
+     Authentication Service).
+
+
+Component Specs
+~~~~~~~~~~~~~~~
+
+Roaming Client Specs (Public class):
+
+  * Computers capable of TCP/IP networking, with a DHCP client
+
+  * Must use an 802.11b (or 802.11 DSSS) wireless card for communications
+
+
+Roaming Client Specs (Co-op and Priority class):
+
+  * All of the above
+
+  * As the clients could run any number of potential operating systems,
+    distributing native applications is very inconvenient.  Given the
+    ubiquity of web browsers, and to fulfill the security requirements,
+    we've selected HTTPS as the client authentication transport. 
+    Authentication requests will be made via the HTTPS POST method.  
+
+
+Wireless Gateway Specs:
+
+  * A Gateway shall run a dynamic IP firewall.  It is expected that the
+    Gateway will run either Linux or BSD, but any firewall capable of
+    changing its firewall rules on demand qualifies.
+
+  * It must be able to receive and verify Authentication Service messages
+    against the Service's public PGP key.
+
+  * The Gateway will need to be able to update its firewall rules based on
+    authenticated messages, and revert those rules after a timeout period.
+  
+  * It will maintain its own local list of optional Priority logins.
+
+
+Authentication Service Specs:
+
+  * An Authentication Service provider will maintain a (probably
+    distributed) list of authentication credentials.
+    
+  * Its job is to accept incoming HTTPS authentication requests, check the
+    login, pass, and MAC info against information in the database, and
+    return the results to the IP address that made the request (namely, the
+    Gateway that the Remote Client has associated with).
+    
+  * The message format is to be determined, but will consist of the member's
+    login name, MAC address, and a yea/nay response, all in cleartext signed
+    with the Service's own private key.  HTTP will likely be the transport
+    agent used to send the message to the Gateway.
+
+  * The Service will also provide a method for users to securely update
+    their profiles (including password and acceptable MAC address
+    information).  Auth Service providers may optionally provide a mechanism
+    for applying for Co-op member accounts (sponsorship?).  This should all
+    take place over SSL.
+  
+  * All SSL certs must be registered!
+  
+
+Comments
+~~~~~~~~
+
+We expect to be able to produce and distribute software that will provide
+all of this functionality on most conventional PC hardware.  It is beyond
+the scope of this project to attempt to manage private keys or other
+sensitive data at all Gateways.
+
+The web of trust looks something like this:
+
+  * Clients must trust the Authentication Service with their login
+    credentials, and that the Service's SSL cert hasn't been compromised. 
+    Using a registered cert (and properly managing it) should be sufficient
+    in providing this level of trust.  Passwords shall be stored as MD5
+    hashes in the database, and incoming auth requests will be compared to
+    the hashed versions, never storing a plaintext copy.  MAC address
+    information will be stored in the clear, as it is never private
+    information anyway (it is sent in plain text in every packet!)
+  
+  * Clients do not need to trust individual Gateways for authentication, as
+    no sensitive information is passed in the clear to or through them. 
+
+  * Clients do, however, need to trust the Gateway's notion of DNS and
+    routing...  Although this is not an issue for Co-op authentication, as
+    the Service will use registered SSL certs, the gateways *could* spoof
+    unencrypted traffic.  Clients are therefore encouraged to use secure
+    application layer encryption, such as SSH or VPN, to maintain data
+    privacy.
+
+  * Gateways need to trust the Authentication Service to return good
+    Authentication Messages.  This is assisted by the use of signed
+    cleartext messages.  Assuming that the PGP key has not been compromised,
+    and that the Gateway has a good copy of the Service's current public
+    key, message authenticity is practically guaranteed.
+  
+
+Bugs
+~~~~
+
+* IP Camping
+
+* Stealing IPs before the timeout period ends
+
+* "bad boy" Gateways spoofing DNS data (for clear text services only)
+
+
+Roaming IP problem
+~~~~~~~~~~~~~~~~~~
+
+Here's a novel solution we're kicking around for the Roaming IP problem...
+
+The problem
+-----------
+
+  You're in range of Gateway 'A'.  You get a lease and start talking.  You
+then move out of range of 'A', but into range of Gateway 'B'.  What's your
+IP address?  Gateway?  DNS server?
+
+  Under normal circumstances, these could (and will) all change when you
+pick up a new lease.  But worse than that, you won't be able to route
+packets until you pick up that new lease, either by manually kicking over
+your DHCP client, or when it times out and grabs another one.
+
+  Of course, these could be anything but normal circumstances...  ;)
+  
+  Picture this:
+  
+  Instead of the local DHCP server assigning your IP from a pool of
+addresses, it takes your MAC address, hashes it, takes the least significant
+24 bits, and drops them on the end of a 10.x.x.x address.  It furthermore
+always assigns the gateway and DNS server as 10.254.254.254 (or the like)
+which is the IP of its wireless card, with a caching DNS server sitting on
+it.
+
+  What does this bit of mangling do?
+
+  Good:
+    
+  * You always get the same IP address, DNS, and gateway info no matter
+    which node you visit, all without the need for Gateways to share data
+
+  * Packets will still route, even without picking up a new lease.  When
+    your DHCP lease expires, it will return the exact same info anyway.
+  
+  Bad:
+    
+  * The first couple of packets will probably be dropped, as your system
+    figures out that its local ARP entry is wrong
+    
+  * Stateful connections (like SSH) and authenticated access (like cookie
+    enabled web pages) will break, as you'll appear to be coming from a
+    different IP address (namely, the Gateway's real IP address)
+
+  So, while it's not a perfect solution, it goes a fair bit toward some
+network sanity.  If we can all agree to use a hacked dhcpd on the Gateway
+nodes, this should be a piece of cake...  And Public class users would
+probably never notice a difference.  Other classes should just need a quick
+'Reload' to fix it...
+
+  Of course, if you're moving between nodes, popping out your card and
+reinserting it will do the same thing as the above.  Is it worth it to
+pursue this line of hackery?
+
+
+[  C O M M E N T S   W E L C O M E . .  .   .    . nocat@pez.oreillynet.com  ]
+
+

@@ -1,0 +1,168 @@
+#!/bin/sh
+
+# Note: your PATH is inherited from the gateway process
+#
+
+# Enable IP forwarding.
+#
+sysctl net.inet.ip.forwarding=1
+
+# Load alllll the kernel modules we need.
+#
+# NOTE: Assume that IPFilter is compiled into the kernel.
+
+#
+# By default, accept everything
+#
+# NOTE: IPFilter accepts everything by default unless you use
+# the following directive in your kernel configuration:
+#     options    IPFILTER_DEFAULT_BLOCK
+
+#
+# Flush all tables
+#
+ipf -Fa
+ipnat -CF
+
+#
+# Set the default packets to fw mark 4, or 'denied'.
+#
+# NOTE: IPFilter has no built-in support for 'marking'.
+
+#
+# Masquerade anything that isn't restricted.
+#
+# The current service classes by fwmark are:
+#
+#  1: Owner
+#  2: Co-op
+#  3: Public
+#  4: Denied
+#
+# NOTE: IPFilter has no built-in support for 'marking'.
+
+#
+# Enable active FTP transfers.
+#
+# NOTE: This line must come BEFORE any portmap rules, otherwise when portmap
+# comes along and matches the packet it rewrites it before the proxy gets
+# a chance to work on it.
+#
+# I guess it's okay to enable this regardless of whether FTP is an 
+# included/excluded port. This directive simply masquerades FTP packets that
+# have already been passed by the filtering rules.
+#
+echo "map $ExternalDevice $LocalNetwork -> 0.0.0.0/32 proxy port ftp ftp/tcp" | ipnat -f -
+
+#
+# Map all tcp connections from the masqueraded network(s) to
+# high-numbered ports on the external interface
+#
+# NOTE: The mapped port range should probably be configurable.
+#
+echo "map $ExternalDevice $LocalNetwork -> 0.0.0.0/32 portmap tcp 40000:60000" | ipnat -f -
+
+#
+# For all other IP packets, simply map to the external interface.
+#
+echo "map $ExternalDevice $LocalNetwork -> 0.0.0.0/32" | ipnat -f -
+
+
+#
+# Redirect outbound non-auth web traffic to the local gateway process
+#
+# NOTE: This uses the variable $GatewayAddr, which isn't currently 
+# specified in nocat.conf.
+#
+# Also, these directives redirect EVERY HTTP request to the gateway.
+# Obviously, this is less than ideal.
+#
+echo "rdr $InternalDevice 0.0.0.0/0 port 80 -> $GatewayAddr port $GatewayPort tcp" | ipnat -f -
+echo "rdr $InternalDevice 0.0.0.0/0 port 443 -> $GatewayAddr port $GatewayPort tcp" | ipnat -f -
+
+
+#
+# Accept DNS traffic from the internal to DNSAddr if defined,
+# otherwise Masquerade to the local host (as you must be running a caching server).
+#
+if [ -z $DNSAddr ]; then
+  echo "pass in on $InternalDevice proto tcp/udp from any to $LocalNetwork port = 53 keep state" | ipf -A -f -
+else 
+  for a in $DNSAddr; do
+    echo "pass out on $ExternalDevice proto tcp/udp from any to $a port = 53 keep state" | ipf -A -f -
+  done
+fi
+
+#
+# Lock down more ports for public users, if specified.
+#
+# There are two philosophies in restricting access:  That Which Is Not
+# Specifically Permitted Is Denied, and That Which Is Not Specifically
+# Denied Is Permitted.
+#
+# If "IncludePorts" is defined, the default policy will be to deny all
+# traffic, and only allow the ports mentioned.
+#
+# If "ExcludePorts" is defined, the default policy will be to allow all
+# traffic, except to the ports mentioned.
+#
+# If both are defined, ExcludePorts will be ignored, and the default policy
+# will be to deny all traffic, allowing everything in IncludePorts, and
+# issue a warning.
+#
+if [ "$IncludePorts" ]; then
+
+  if [ "$ExcludePorts" ]; then
+    echo "Warning: ExcludePorts and IncludePorts are both defined."
+    echo "Ignoring 'ExcludePorts'.  Please check your nocat.conf."
+  fi
+
+  #
+  # Enable all ports in IncludePorts
+  #
+  #echo "Enabling public access to these ports: $IncludePorts"
+  
+  for port in $IncludePorts; do
+    echo "pass in on $InternalDevice proto tcp from any to any port = $port keep state" | ipf -A -f -
+  done
+
+  # Always permit access to the GatewayPort (or we can't logout)
+  #
+  echo "pass in on $InternalDevice proto tcp from any to any port = $GatewayPort keep state" | ipf -A -f -
+  
+  # ...and disable access to the rest.
+  #
+  echo "block in on $InternalDevice proto tcp all" | ipf -A -f -
+
+elif [ "$ExcludePorts" ]; then
+  #
+  # If ExcludePorts has entries, simply deny access to them.
+  #
+  #echo "Denying public access to these ports: $ExcludePorts"
+
+  for port in $ExcludePorts; do
+    echo "block in on $InternalDevice proto tcp from any to any port = $port" | ipf -A -f -
+  done
+fi
+  
+
+#
+# Accept remaining traffic on the internal (unless noted above)
+#
+echo "pass in on $InternalDevice all" | ipf -A -f -
+
+#
+# Accept remaining traffic on the internal (unless noted above)
+#
+echo "pass in on $InternalDevice all" | ipf -A -f -
+
+#
+# Enable Logging
+#
+# Call the bandwidth throttle rules.
+#
+# ENOTDONEYET
+
+#
+# Ende
+#
