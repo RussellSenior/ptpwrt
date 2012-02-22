@@ -10,10 +10,13 @@ PKG_RELEASE:=1
 include $(INCLUDE_DIR)/package.mk
 
 define Package/ptp-node
+  SECTION:=ptp
+  CATEGORY:=PTP
   TITLE:=Personal Telco Project node metapackage
   URL:=https://personaltelco.net/wiki/OpenWrt
+  MAINTAINER:=Keegan Quinn <keegan@personaltelco.net>
   DEPENDS:=+dnsmasq \
-  	+dropbear \
+	+dropbear \
 	+batman-adv \
 	+curl \
 	+iftop \
@@ -48,5 +51,9 @@ define Package/ptp-node/description
  - wget
 endef
 
-$(eval $(call Package,ptp-node))
+define Package/ptp-node/install
+  true
+end
+
+$(eval $(call BuildPackage,ptp-node))
 
