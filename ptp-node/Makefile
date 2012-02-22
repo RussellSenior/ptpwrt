@@ -53,7 +53,7 @@ endef
 
 define Package/ptp-node/install
   true
-end
+endef
 
 $(eval $(call BuildPackage,ptp-node))
 
