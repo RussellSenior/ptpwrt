@@ -49,7 +49,27 @@ define Package/nocatauth-ptp/description
 endef
 
 define Package/nocatauth-ptp/install
+	$(INSTALL_DIR) $(1)/etc/config
+	$(INSTALL_DATA) ./files/nocatauth.config $(1)/etc/config/nocatauth
 
+	$(INSTALL_DIR) $(1)/etc/init.d
+	$(INSTALL_BIN) ./files/nocatauth.init $(1)/etc/init.d/nocatauth
+
+	$(INSTALL_DIR) $(1)/usr/bin
+	$(INSTALL_BIN) ./files/bin/gateway $(1)/usr/bin/nocatauth
+
+	$(INSTALL_DIR) $(1)/usr/lib/perl5
+	$(CP) -r ./files/lib/* $(1)/usr/lib/perl5/
+
+	$(INSTALL_DIR) $(1)/usr/lib/nocatauth
+	$(CP) -r ./files/libexec/* $(1)/usr/lib/nocatauth/
+
+	$(INSTALL_DIR) $(1)/www
+	$(CP) -r ./files/www/* $(1)/www/
+endef
+
+define Package/nocatauth-ptp/conffiles
+/etc/config/nocatauth
 endef
 
 $(eval $(call BuildPackage,nocatauth-ptp))
