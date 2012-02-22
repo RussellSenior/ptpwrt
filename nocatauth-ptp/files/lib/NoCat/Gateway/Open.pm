@@ -1,11 +1,12 @@
 package NoCat::Gateway::Open;
 
 use NoCat::Gateway qw( PERMIT DENY PUBLIC );
+use NoCat::BrowserDetect;
 use vars qw( @ISA @REQUIRED );
 use strict;
 
 @ISA	    = 'NoCat::Gateway';
-@REQUIRED   = ( @NoCat::Gateway::REQUIRED, qw( SplashForm ));
+@REQUIRED   = ( @NoCat::Gateway::REQUIRED, qw( SplashForm MobileForm ));
 
 my %MIME = (
     jpg	    => "image/jpeg",
@@ -26,7 +27,7 @@ sub handle {
     if ( my $host = $request->{Host} ) {
 	my $me = $peer->gateway_ip;
 
-        $self->log( 7, "Peer ", $peer->socket->peerhost, " requests $host" );
+        $self->log( 7, "Peer", $peer->socket->peerhost, "requests $host" );
 
         # $self->log( 9, "HTTP headers: @{[ %$request ]}" );
 
@@ -77,7 +78,7 @@ sub handle {
 sub serve {
     my ( $self, $peer, $request ) = @_;
 
-    my $file = "$self->{DocumentRoot}/$request->{URI}";
+    my $file = "$self->{DocumentRoot}$request->{URI}";
     $file =~ s/\.+/./gos; # Prevent ../ type whatnot.
 
     my ($ext) = ( $file =~ /([^\.\/]+)$/gos ); # Try to get the file extension?
@@ -136,9 +137,17 @@ sub capture {
 
 sub splash {
     my ( $self, $peer, $request ) = @_;
+    my $browser = new NoCat::BrowserDetect($request->{Agent});
     
-    $self->log( 8, "Displaying splash page to peer", $peer->ip );
-    $self->respond( $peer, SplashForm => $self->splash_vars($peer, $request) )
+    if ($browser->mobile) {
+	$self->log( 5, "Client: " . $peer->ip . " " . $peer->mac . " $request->{Agent}");
+	$self->log( 5, "Displaying mobile splash page to peer", $peer->ip );
+        $self->respond( $peer, MobileForm => $self->splash_vars($peer, $request) )
+    } else {
+	$self->log( 5, "Client: " . $peer->ip . " " . $peer->mac . " $request->{Agent}");
+	$self->log( 5, "Displaying splash page to peer", $peer->ip );
+	$self->respond( $peer, SplashForm => $self->splash_vars($peer, $request) )
+    }
 }
 
 sub splash_vars {
@@ -164,7 +173,7 @@ sub verify {
 	if $line =~ /(?:^|&)redirect=([^&]+)/o;
     
     if ( $url ) {
-	$self->log( 5, "Opening portal for " . $peer->ip . " to $url" );
+	$self->log( 5, "Opening portal for " . $peer->ip . " " . $peer->mac . " to $url" );
 	$self->permit( $peer => PUBLIC );
 	$self->redirect( $peer => $url ); 
     } else {

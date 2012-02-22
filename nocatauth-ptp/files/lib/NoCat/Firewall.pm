@@ -25,7 +25,8 @@ my @Perform_Export = qw(
 # its output to get ARP cache data. Turns out '/sbin/arp -an' gives the same
 # output on both Linux and *BSD. (Thank goodness.)
 #
-my $Arp_Cache = ( -r "/proc/net/arp" ? "/proc/net/arp" : "arp -an|" );
+#my $Arp_Cache = ( -r "/proc/net/arp" ? "/proc/net/arp" : "arp -an|" );
+my $Arp_Cache = ( "ip n|" );
 my $Ifconfig  = "ifconfig -a";
 my $Netstat   = "netstat -rn";
 
@@ -123,9 +124,9 @@ sub arp_table {
     open( ARP, $Arp_Cache ) or die "Can't open arp table $Arp_Cache: $!";
 
     while ( <ARP> ) {
-	next unless /^\?\s+\($IP_Match\)\s+at\s+$MAC_Match/io	 # Match /sbin/arp -an
-	    or /^$IP_Match\s+(?:[0-9a-fx]+\s+){2}$MAC_Match/io;  # or match /proc/net/arp
-
+	next unless 
+	    /^$IP_Match\s.*\s.*\s.*\s$MAC_Match\s(REACHABLE|DELAY)/io;
+	
 	if ( $mode eq BY_IP ) {
 	    $table{$1} = $2
 	} else { # BY_MAC
@@ -134,7 +135,6 @@ sub arp_table {
     }
 
     close(ARP);
-
     return \%table;
 }
 

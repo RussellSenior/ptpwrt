@@ -21,6 +21,8 @@ fi
 if [ "$action" = "permit" ]; then
     cmd=-A
 elif [ "$action" = "deny" ]; then
+    logger tried deny $mac
+    [ -f /usr/bin/client-status.sh ] && /usr/bin/client-status.sh -e $mac
     cmd=-D
 else
     echo "FATAL: Bad action: $action!"

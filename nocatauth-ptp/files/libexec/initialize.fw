@@ -26,18 +26,6 @@ if [ $(id -u) = 0 ]; then
     #
     echo "1" > /proc/sys/net/ipv4/ip_forward
     echo "1" > /proc/sys/net/ipv4/conf/all/rp_filter
-
-    # Load alllll the kernel modules we need.
-    #
-    rmmod ipchains > /dev/null 2>&1 # for RH 7.1 users.
-
-    for module in ip_tables ipt_REDIRECT ipt_MASQUERADE ipt_MARK ipt_REJECT  \
-	ipt_TOS ipt_LOG iptable_mangle iptable_filter iptable_nat ip_nat_ftp \
-	ip_conntrack ip_conntrack_ftp ip_conntrack_irc \
-	ip_nat_irc ipt_mac ipt_state ipt_mark; do
-
-	modprobe $module
-    done
 fi
 
 # Flush all user-defined chains
@@ -106,7 +94,7 @@ for iface in $InternalDevice; do
 	#
 	if [ "$AuthServiceAddr" -o "$AllowedWebHosts" ]; then 
 	    for host in $AuthServiceAddr $AllowedWebHosts; do
-		for port in 80 443; do
+		for port in 80; do
 		    $nat      -s $net -d $host -p tcp --dport $port -j MASQUERADE
     		    $redirect -s $net -d $host -p tcp --dport $port -j RETURN
 		    $fwd -s $net -d $host -p tcp --dport $port -j ACCEPT
@@ -153,9 +141,8 @@ if [ "$MembersOnly" ]; then
 else
     nonauth="4"
 fi
-for port in 80 443; do
+for port in 80; do
     for mark in $nonauth; do
-	$redirect -m mark --mark $mark -d windowsupdate.microsoft.com -j DROP
 	$redirect -m mark --mark $mark -p tcp --dport $port  -j REDIRECT \
 	    --to-port $GatewayPort
     done
@@ -218,7 +205,7 @@ if [ "$AuthServiceAddr" ]; then
 fi
 
 # Filter policy.
-$fwd -j DROP
+#$fwd -j DROP
 
 #
 # Call the bandwidth throttle rules.
@@ -241,6 +228,8 @@ $fwd -j DROP
 # Add any other local firewall rules below.
 ##
 
+iptables -t nat -I POSTROUTING -o $ExternalDevice -j MASQUERADE
+
 ##
 # Uncomment the following to permit all 10/8 traffic *before* auth
 ##
@@ -251,6 +240,13 @@ $fwd -j DROP
 #  iptables -t mangle -A PREROUTING -d $net -j MARK --set-mark 2
 #  iptables -t filter -A FORWARD -s $net -j ACCEPT
 #done      
+
+AllowedNetworks="70.102.34.162/32"
+
+for net in $AllowedNetworks; do
+  iptables -t mangle -A PREROUTING -d $net -j MARK --set-mark 2
+  iptables -t filter -A FORWARD -s $net -j ACCEPT
+done      
 
 #
 # Ende
