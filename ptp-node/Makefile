@@ -5,7 +5,7 @@ include $(TOPDIR)/rules.mk
 
 PKG_NAME:=ptp-node
 PKG_VERSION:=0.1
-PKG_RELEASE:=1
+PKG_RELEASE:=2
 
 include $(INCLUDE_DIR)/package.mk
 
@@ -17,11 +17,9 @@ define Package/ptp-node
   MAINTAINER:=Keegan Quinn <keegan@personaltelco.net>
   DEPENDS:=+ptp-utils \
 	+dnsmasq \
-	+dropbear \
 	+kmod-batman-adv \
 	+iftop \
 	+net-snmp \
-	+nocatauth-ptp \
 	+olsrd \
 	+openvpn \
 	+radvd \
@@ -36,12 +34,10 @@ used in common Personal Telco Project node installations.
 Depends on:
  - ptp-utils (TODO!)
  - dnsmasq
- - dropbear
  - kmod-batman-adv
  - curl
  - iftop
  - net-snmp
- - nocatauth-ptp
  - olsrd
  - openvpn
  - radvd
