@@ -21,7 +21,7 @@ define Package/ptp-node
 	+kmod-batman-adv \
 	+iftop \
 	+net-snmp \
-	+nocatauth \
+	+nocatauth-ptp \
 	+olsrd \
 	+openvpn \
 	+radvd \
@@ -41,7 +41,7 @@ define Package/ptp-node/description
  - curl
  - iftop
  - net-snmp
- - nocatauth
+ - nocatauth-ptp
  - olsrd
  - openvpn
  - radvd
