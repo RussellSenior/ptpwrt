@@ -1,9 +1,0 @@
-#!/bin/sh
-##
-# dump.fw: show the status of all chains.
-##
-
-# Note: your PATH is inherited from the gateway process
-#
-
-ipchains -n -L
