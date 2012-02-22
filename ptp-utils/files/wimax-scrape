@@ -1,0 +1,2 @@
+#!/bin/sh
+curl -d "var%3Amain=menu&var%3Astyle=style5&getpage=%2Fusr%2Fwww_safe%2Fhtml%2Fdefs%2Fstyle5%2Fmenus%2Fmenu.html&errorpage=%2Fusr%2Fwww%2Findex.html&var%3Apagename=status_network&var%3Aerrorpagename=status_network&var%3Amenu=status&var%3Amenutitle=Status&var%3Apagetitle=Network&var%3Apagemaster=status_network&login%3Acommand%2Fusername=router&login%3Acommand%2Fpassword=CLEAR123" -s http://192.168.15.1/cgi-bin/webcm|egrep -A1 '(RSSI|Downlink|Uplink)' |grep "<td>"|sed 's:.*>\(.*\)<.*:\1:' | awk '{print $1}'>/tmp/motorola.txt

@@ -1,0 +1,3 @@
+#!/bin/sh
+
+tcpdump -n -i br-lan 'tcp[tcpflags] & tcp-syn != 0 and tcp[tcpflags] & tcp-ack == 0 and not src and dst net 127.0.0.0/8'

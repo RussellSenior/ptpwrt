@@ -1,0 +1,2 @@
+#!/bin/sh
+wget -q -O - http://localhost:5280/status | grep -c "<td>10\.11"
