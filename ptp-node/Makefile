@@ -5,7 +5,7 @@ include $(TOPDIR)/rules.mk
 
 PKG_NAME:=ptp-node
 PKG_VERSION:=0.1
-PKG_RELEASE:=2
+PKG_RELEASE:=3
 
 include $(INCLUDE_DIR)/package.mk
 
@@ -17,14 +17,28 @@ define Package/ptp-node
   MAINTAINER:=Keegan Quinn <keegan@personaltelco.net>
   DEPENDS:=+ptp-utils \
 	+dnsmasq \
+	+dropbear \
+	+wireless-tools \
+	+ip6tables \
+	+traceroute6 \
+	+radvd \
 	+kmod-batman-adv \
+	+nocatauth \
+	+curl \
+	+hostapd-mini \
 	+iftop \
-	+net-snmp \
+	+ip \
+	+iw \
+	+iwinfo \
 	+olsrd \
 	+openvpn \
+	+procps \
 	+radvd \
 	+rsync \
-	+wget
+	+snmpd \
+	+tcpdump-mini \
+	+wget \
+	+wpad-mini
 endef
 
 define Package/ptp-node/description
@@ -32,18 +46,30 @@ Meta-configuration option which depends on all software which is
 used in common Personal Telco Project node installations.
 
 Depends on:
- - ptp-utils (TODO!)
+ - ptp-utils
  - dnsmasq
+ - dropbear
+ - wireless-tools
+ - ip6tables
+ - traceroute6
+ - radvd
  - kmod-batman-adv
+ - nocatauth
  - curl
+ - hostapd-mini
  - iftop
- - net-snmp
+ - ip
+ - iw
+ - iwinfo
  - olsrd
  - openvpn
+ - procps
  - radvd
  - rsync
+ - snmpd
  - tcpdump-mini
  - wget
+ - wpad-mini
 endef
 
 define Build/Compile
