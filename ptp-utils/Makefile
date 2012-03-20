@@ -18,6 +18,10 @@ define Package/ptp-utils
   DEPENDS:=+curl +tcpdump-mini
 endef
 
+define Package/ptp-utils/config
+	select BUSYBOX_CONFIG_ZCIP
+endef
+
 define Package/ptp-utils/description
 Assorted utility scripts which are frequently used in common
 Personal Telco Project node installations.

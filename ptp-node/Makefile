@@ -44,7 +44,6 @@ endef
 
 define Package/ptp-node/config
 	select BUSYBOX_CONFIG_NTPD
-	select BUSYBOX_CONFIG_ZCIP
 endef
 
 define Package/ptp-node/description
