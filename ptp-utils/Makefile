@@ -4,7 +4,7 @@
 include $(TOPDIR)/rules.mk
 
 PKG_NAME:=ptp-utils
-PKG_VERSION:=0.1
+PKG_VERSION:=0.2
 PKG_RELEASE:=1
 
 include $(INCLUDE_DIR)/package.mk
@@ -30,6 +30,9 @@ Includes the following scripts:
  - wimax-sig
  - wimax-up
  - wimax-down
+
+Also includes support for the 'zcip' network configuration mode, which uses
+the zcip tool to configure a ZeroConf IPv4 link-local address.
 endef
 
 define Build/Compile
@@ -39,6 +42,9 @@ define Build/Configure
 endef
 
 define Package/ptp-utils/install
+	$(INSTALL_DIR) $(1)/lib/network
+	$(INSTALL_BIN) ./files/zcip.sh $(1)/lib/network/zcip.sh
+
 	$(INSTALL_DIR) $(1)/usr/bin
 	$(INSTALL_BIN) ./files/assoc-count $(1)/usr/bin/assoc-count
 	$(INSTALL_BIN) ./files/client-status $(1)/usr/bin/client-status
@@ -47,6 +53,9 @@ define Package/ptp-utils/install
 	$(INSTALL_BIN) ./files/wimax-scrape $(1)/usr/bin/wimax-scrape
 	$(INSTALL_BIN) ./files/wimax-sig $(1)/usr/bin/wimax-sig
 	$(INSTALL_BIN) ./files/wimax-up $(1)/usr/bin/wimax-up
+
+	$(INSTALL_DIR) $(1)/usr/share/zcip
+	$(INSTALL_BIN) ./files/zcip.script $(1)/usr/share/zcip/zcip.script
 endef
 
 $(eval $(call BuildPackage,ptp-utils))
