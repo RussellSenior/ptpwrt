@@ -41,6 +41,10 @@ define Package/ptp-node
 	+wpad-mini
 endef
 
+define Package/ptp-node/config
+	select BUSYBOX_CONFIG_ZCIP
+endef
+
 define Package/ptp-node/description
 Meta-configuration option which depends on all software which is
 used in common Personal Telco Project node installations.
