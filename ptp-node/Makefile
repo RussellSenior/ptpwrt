@@ -5,7 +5,7 @@ include $(TOPDIR)/rules.mk
 
 PKG_NAME:=ptp-node
 PKG_VERSION:=0.2
-PKG_RELEASE:=1
+PKG_RELEASE:=2
 
 include $(INCLUDE_DIR)/package.mk
 
@@ -31,6 +31,7 @@ define Package/ptp-node
 	+ip \
 	+iw \
 	+iwinfo \
+	+miniupnpd \
 	+olsrd \
 	+openvpn \
 	+procps \
@@ -67,6 +68,7 @@ Depends on:
  - ip
  - iw
  - iwinfo
+ - miniupnpd
  - olsrd
  - openvpn
  - procps
