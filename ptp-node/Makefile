@@ -4,8 +4,8 @@
 include $(TOPDIR)/rules.mk
 
 PKG_NAME:=ptp-node
-PKG_VERSION:=0.1
-PKG_RELEASE:=3
+PKG_VERSION:=0.2
+PKG_RELEASE:=1
 
 include $(INCLUDE_DIR)/package.mk
 
@@ -23,6 +23,7 @@ define Package/ptp-node
 	+traceroute6 \
 	+radvd \
 	+kmod-batman-adv \
+	+kmod-lib80211 \
 	+nocatauth \
 	+curl \
 	+hostapd-mini \
@@ -42,6 +43,7 @@ define Package/ptp-node
 endef
 
 define Package/ptp-node/config
+	select BUSYBOX_CONFIG_NTPD
 	select BUSYBOX_CONFIG_ZCIP
 endef
 
@@ -58,6 +60,7 @@ Depends on:
  - traceroute6
  - radvd
  - kmod-batman-adv
+ - kmod-lib80211
  - nocatauth
  - curl
  - hostapd-mini
@@ -74,6 +77,9 @@ Depends on:
  - tcpdump-mini
  - wget
  - wpad-mini
+
+Selecting this package will also select certain configuration options which
+are needed to use the standard PTP settings.
 endef
 
 define Build/Compile
