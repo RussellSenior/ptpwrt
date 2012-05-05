@@ -23,7 +23,7 @@ Usage
 
 Add to your feeds.conf:
 
-    src-git ptpwrt git://github.com/keeganquinn/ptpwrt.git
+    src-git ptpwrt git://github.com/keeganquinn/ptpwrt-packages.git
 
 Then retrieve and install the packages:
 
