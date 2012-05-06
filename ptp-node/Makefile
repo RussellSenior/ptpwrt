@@ -90,6 +90,8 @@ define Build/Configure
 endef
 
 define Package/ptp-node/install
+	$(INSTALL_DIR) $(1)/lib/upgrade/keep.d
+	$(INSTALL_DATA) ./files/ptp-node.keep $(1)/lib/upgrade/keep.d/ptp-node
 endef
 
 $(eval $(call BuildPackage,ptp-node))
