@@ -6,6 +6,8 @@ For more information about OpenWrt, visit https://openwrt.org/
 For more information about the Personal Telco Project, visit
 https://personaltelco.net/wiki/
 
+Authors: Jason McArthur, Russell Senior, Keegan Quinn
+
 Concept
 -------
 
